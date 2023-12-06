@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        canvas {
+            border: 1px solid #000;
+        }
+    </style>
+    <title>Color Blocks</title>
+</head>
+<body>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <script>
+	alert("Розмісти маленькі блоки у відповідні великі блоки сортуючи їх по схожих кольорах кольорах")
+        document.addEventListener("DOMContentLoaded", function () {
+            const canvas = document.getElementById("gameCanvas");
+            const ctx = canvas.getContext("2d");
+
+            const bigBlocks = [
+                { x: 0, y: 0, width: 100, height: 100, color: getRandomColor() },
+                { x: canvas.width - 100, y: 0, width: 100, height: 100, color: getRandomColor() },
+                { x: 0, y: canvas.height - 100, width: 100, height: 100, color: getRandomColor() },
+                { x: canvas.width - 100, y: canvas.height - 100, width: 100, height: 100, color: getRandomColor() },
+            ];
+
+            const smallBlocks = Array.from({ length: 10 }, () => ({
+                x: Math.random() * (canvas.width - 20),
+                y: Math.random() * (canvas.height - 20),
+                width: 20,
+                height: 20,
+                color: getRandomColor(),
+                isDragging: false,
+            }));
+
+            function drawBlocks() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Відобразити великі блоки
+                bigBlocks.forEach(block => {
+                    ctx.fillStyle = block.color;
+                    ctx.fillRect(block.x, block.y, block.width, block.height);
+                });
+
+                // Відобразити малі блоки
+                smallBlocks.forEach(block => {
+                    ctx.fillStyle = block.color;
+                    ctx.fillRect(block.x, block.y, block.width, block.height);
+                });
+            }
+
+            function getRandomColor() {
+                const letters = "0123456789ABCDEF";
+                let color = "#";
+                for (let i = 0; i < 6; i++) {
+                    color += letters[Math.floor(Math.random() * 16)];
+                }
+                return color;
+            }
+
+            function isMouseInsideBlock(block, mouseX, mouseY) {
+                return mouseX >= block.x &&
+                       mouseX <= block.x + block.width &&
+                       mouseY >= block.y &&
+                       mouseY <= block.y + block.height;
+            }
+
+            function handleMouseDown(event) {
+                const mouseX = event.clientX - canvas.getBoundingClientRect().left;
+                const mouseY = event.clientY - canvas.getBoundingClientRect().top;
+
+                smallBlocks.forEach(block => {
+                    if (isMouseInsideBlock(block, mouseX, mouseY)) {
+                        block.isDragging = true;
+                    }
+                });
+            }
+
+            function handleMouseMove(event) {
+                const mouseX = event.clientX - canvas.getBoundingClientRect().left;
+                const mouseY = event.clientY - canvas.getBoundingClientRect().top;
+
+                smallBlocks.forEach(block => {
+                    if (block.isDragging) {
+                        block.x = mouseX - block.width / 2;
+                        block.y = mouseY - block.height / 2;
+                    }
+                });
+
+                drawBlocks();
+            }
+
+            function handleMouseUp() {
+                smallBlocks.forEach(block => {
+                    block.isDragging = false;
+                });
+            }
+
+            canvas.addEventListener("mousedown", handleMouseDown);
+            canvas.addEventListener("mousemove", handleMouseMove);
+            canvas.addEventListener("mouseup", handleMouseUp);
+
+            drawBlocks();
+        });
+    </script>
+</body>
+</html>
